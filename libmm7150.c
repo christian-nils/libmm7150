@@ -47,24 +47,6 @@ static void handle_sig(int sig)
 	stop = true;
 }
 
-
-static ssize_t sample_cb(const struct iio_channel *chn, void *src, size_t bytes, void *d)
-{
-	const struct iio_data_format *fmt = iio_channel_get_data_format(chn);
-	unsigned int repeat = has_repeat ? fmt->repeat : 1;
-	int j;
-
-	printf("%s ", iio_channel_get_id(chn));
-	for (j = 0; j < repeat; ++j) {
-		if (bytes == sizeof(int16_t))
-			printf("%i ", ((int16_t *)src)[j]);
-		else if (bytes == sizeof(int64_t))
-			printf("%ld ", ((int64_t *)src)[j]);
-	}
-
-	return bytes * repeat;
-}
-
 /* simple configuration and streaming */
 int main(int argc, char **argv)
 {
@@ -170,7 +152,29 @@ int main(int argc, char **argv)
 			}
 
 		// Print each captured sample
-		iio_buffer_foreach_sample(rxbuf, sample_cb, NULL);
+		for (int i = 0; i < channel_count; ++i) {
+			uint8_t *buf;
+			size_t bytes;
+			const struct iio_data_format *fmt = iio_channel_get_data_format(channels[i]);
+			unsigned int repeat = has_repeat ? fmt->repeat : 1;
+			size_t sample_size = fmt->length / 8 * repeat;
+
+			buf = malloc(sample_size * buffer_length);
+
+			bytes = iio_channel_read(channels[i], rxbuf, buf, sample_size * buffer_length);
+
+			printf("%s ", iio_channel_get_id(channels[i]));
+			for (int sample = 0; sample < bytes / sample_size; ++sample) {
+				for (int j = 0; j < repeat; ++j) {
+					if (fmt->length / 8 == sizeof(int16_t))
+						printf("%i ", ((int16_t *)buf)[sample + j]);
+					else if (fmt->length / 8 == sizeof(int64_t))
+						printf("%li ", ((int64_t *)buf)[sample + j]);
+				}
+			}
+
+			free(buf);
+		}
 		printf("\n");
 
 	}
