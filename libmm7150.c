@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 	struct iio_device *trigger;
 
 	// Initialize variables
-	int i;
+	int i,j,sample;
 
 	// Listen to ctrl+c and assert
 	signal(SIGINT, handle_sig);
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 			}
 
 		// Print each captured sample
-		for (int i = 0; i < channel_count; ++i) {
+		for (i = 0; i < channel_count; ++i) {
 			uint8_t *buf;
 			size_t bytes;
 			const struct iio_data_format *fmt = iio_channel_get_data_format(channels[i]);
@@ -164,8 +164,8 @@ int main(int argc, char **argv)
 			bytes = iio_channel_read(channels[i], rxbuf, buf, sample_size * buffer_length);
 
 			printf("%s ", iio_channel_get_id(channels[i]));
-			for (int sample = 0; sample < bytes / sample_size; ++sample) {
-				for (int j = 0; j < repeat; ++j) {
+			for (sample = 0; sample < bytes / sample_size; ++sample) {
+				for (j = 0; j < repeat; ++j) {
 					if (fmt->length / 8 == sizeof(int16_t))
 						printf("%i ", ((int16_t *)buf)[sample + j]);
 					else if (fmt->length / 8 == sizeof(int64_t))
