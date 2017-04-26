@@ -23,6 +23,7 @@ static struct iio_channel **channels;
 static int channel_count;
 
 static bool stop;
+static bool has_repeat;
 
 /* cleanup and exit */
 static void shutdown()
@@ -116,7 +117,7 @@ int main(int argc, char **argv)
 
 	// Acquiring trigger, if it fails the program will terminate
 	printf("* Acquiring trigger\n");
-	if (iio_device_get_trigger(dev, trigger)){
+	if (iio_device_get_trigger(dev, &trigger)){
 		perror("No trigger found");
 		shutdown();
 	}
