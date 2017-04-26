@@ -50,6 +50,7 @@ static struct {
 	{ "power",	"W" },
 	{ "temp",	"°C" },
 	{ "voltage",	"V" },
+	{ "accel",	"m/s^2"},
 	{ 0, },
 };
 
@@ -228,7 +229,7 @@ int main(int argc, char **argv)
 				name = id;
 			unit = id_to_unit(id);
 
-			printf("%s: %.3lf %s\n", name, get_channel_value(chn), unit);
+			printf("%s: %.3lf %s\n", name, get_channel_value(chn), name);
 			
 		}
 		printf("\n");
