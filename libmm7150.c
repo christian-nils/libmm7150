@@ -69,6 +69,10 @@ int main(int argc, char **argv)
 {
 	// Hardware trigger
 	struct iio_device *trigger;
+
+	// Initialize variables
+	int i, j;
+
 	// Listen to ctrl+c and assert
 	signal(SIGINT, handle_sig);
 
@@ -88,7 +92,7 @@ int main(int argc, char **argv)
 
 	// Initialization of the channels corresponding to the device to allocate required memory
 	printf("* Initializing IIO streaming channels:\n");
-	for (int i = 0; i < iio_device_get_channels_count(dev); ++i) {
+	for (i = 0; i < iio_device_get_channels_count(dev); ++i) {
 		struct iio_channel *chn = iio_device_get_channel(dev, i);
 		if (iio_channel_is_scan_element(chn)) {
 			printf("%s\n", iio_channel_get_id(chn));
@@ -109,7 +113,7 @@ int main(int argc, char **argv)
 	}
 
 	// Populate the allocated memory
-	for (int i = 0; i < channel_count; ++i) {
+	for (i = 0; i < channel_count; ++i) {
 		struct iio_channel *chn = iio_device_get_channel(dev, i);
 		if (iio_channel_is_scan_element(chn))
 			channels[i] = chn;
@@ -124,7 +128,7 @@ int main(int argc, char **argv)
 
 	// Enable the channels for buffered capture
 	printf("* Enabling IIO streaming channels for buffered capture\n");
-	for (int i = 0; i < channel_count; ++i)
+	for (i = 0; i < channel_count; ++i)
 		iio_channel_enable(channels[i]);
 
 	// Create a buffer with one sample
