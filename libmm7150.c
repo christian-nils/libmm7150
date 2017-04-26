@@ -31,12 +31,6 @@ static void shutdown()
 {
 	if (channels) { free(channels); }
 
-	printf("* Destroying buffers\n");
-	if (rxbuf) { iio_buffer_destroy(rxbuf); }
-
-	printf("* Disassociate trigger\n");
-	if (dev) { iio_device_set_trigger(dev, NULL); }
-
 	printf("* Destroying context\n");
 	if (ctx) { iio_context_destroy(ctx); }
 	exit(0);
@@ -176,7 +170,7 @@ int main(int argc, char **argv)
 			channels[i] = chn;
 	}
 
-	// Enable the channels for buffered capture
+	/*// Enable the channels for buffered capture
 	printf("* Enabling IIO streaming channels for buffered capture\n");
 	for (i = 0; i < channel_count; ++i)
 		iio_channel_enable(channels[i]);
@@ -188,7 +182,7 @@ int main(int argc, char **argv)
 		perror("Could not create buffer");
 		shutdown();
 	}
-
+	*/
 	// Starting the streaming
 	printf("* Starting IO streaming (press CTRL+C to cancel)\n");
 	bool has_ts = strcmp(iio_channel_get_id(channels[channel_count - 1]), "timestamp") == 0;
@@ -200,6 +194,7 @@ int main(int argc, char **argv)
 		ptrdiff_t p_inc;
 		int64_t now_ts;
 
+		/*
 		// Refill RX buffer
 		nbytes_rx = iio_buffer_refill(rxbuf);
 		if (nbytes_rx < 0) {
@@ -217,7 +212,7 @@ int main(int argc, char **argv)
 				printf("[%04ld] ", last_ts > 0 ? (now_ts - last_ts) / 1000 / 1000 : 0);
 				last_ts = now_ts;
 			}
-
+			*/
 		// Print each captured sample
 		for (i = 0; i < channel_count; i++) {
 			const char *id;
