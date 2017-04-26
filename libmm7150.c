@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 				name = id;
 			unit = id_to_unit(id);
 
-			printf("%s: %.3lf %s\n", name, get_channel_value(chn), name);
+			printf("%s: %.3lf %s\n", name, get_channel_value(chn), unit);
 			
 		}
 		printf("\n");
