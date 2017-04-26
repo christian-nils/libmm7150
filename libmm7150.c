@@ -52,9 +52,10 @@ static ssize_t sample_cb(const struct iio_channel *chn, void *src, size_t bytes,
 {
 	const struct iio_data_format *fmt = iio_channel_get_data_format(chn);
 	unsigned int repeat = has_repeat ? fmt->repeat : 1;
+	int j;
 
 	printf("%s ", iio_channel_get_id(chn));
-	for (int j = 0; j < repeat; ++j) {
+	for (j = 0; j < repeat; ++j) {
 		if (bytes == sizeof(int16_t))
 			printf("%i ", ((int16_t *)src)[j]);
 		else if (bytes == sizeof(int64_t))
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
 	struct iio_device *trigger;
 
 	// Initialize variables
-	int i, j;
+	int i;
 
 	// Listen to ctrl+c and assert
 	signal(SIGINT, handle_sig);
