@@ -71,6 +71,22 @@ static const char *id_to_unit(const char *id)
 	return "";
 }
 
+static bool channel_has_attr(struct iio_channel *chn, const char *attr)
+{
+	unsigned int i, nb = iio_channel_get_attrs_count(chn);
+	for (i = 0; i < nb; i++)
+		if (!strcmp(attr, iio_channel_get_attr(chn, i)))
+			return true;
+	return false;
+}
+
+static bool is_valid_channel(struct iio_channel *chn)
+{
+	return !iio_channel_is_output(chn) &&
+		(channel_has_attr(chn, "raw") ||
+			channel_has_attr(chn, "input"));
+}
+
 static double get_channel_value(struct iio_channel *chn)
 {
 	char *old_locale;
