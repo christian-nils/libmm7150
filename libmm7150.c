@@ -47,6 +47,63 @@ static void handle_sig(int sig)
 	stop = true;
 }
 
+static struct {
+	const char *id;
+	const char *unit;
+} map[] = {
+	{ "current",	"A" },
+	{ "power",	"W" },
+	{ "temp",	"°C" },
+	{ "voltage",	"V" },
+	{ 0, },
+};
+
+static const char *id_to_unit(const char *id)
+{
+	unsigned int i;
+
+	for (i = 0; map[i].id; i++) {
+		if (!strncmp(id, map[i].id, strlen(map[i].id)))
+			return map[i].unit;
+	}
+
+	return "";
+}
+
+static double get_channel_value(struct iio_channel *chn)
+{
+	char *old_locale;
+	char buf[1024];
+	double val;
+
+	old_locale = strdup(setlocale(LC_NUMERIC, NULL));
+	setlocale(LC_NUMERIC, "C");
+
+	if (channel_has_attr(chn, "input")) {
+		iio_channel_attr_read(chn, "input", buf, sizeof(buf));
+		val = strtod(buf, NULL);
+	}
+	else {
+		iio_channel_attr_read(chn, "raw", buf, sizeof(buf));
+		val = strtod(buf, NULL);
+
+		if (channel_has_attr(chn, "offset")) {
+			iio_channel_attr_read(chn, "offset", buf, sizeof(buf));
+			val += strtod(buf, NULL);
+		}
+
+		if (channel_has_attr(chn, "scale")) {
+			iio_channel_attr_read(chn, "scale", buf, sizeof(buf));
+			val *= strtod(buf, NULL);
+		}
+	}
+
+	setlocale(LC_NUMERIC, old_locale);
+	free(old_locale);
+
+	return val / 1000.0;
+}
+
 /* simple configuration and streaming */
 int main(int argc, char **argv)
 {
@@ -145,28 +202,22 @@ int main(int argc, char **argv)
 			}
 
 		// Print each captured sample
-		for (i = 0; i < channel_count; ++i) {
-			uint8_t *buf;
-			size_t bytes;
-			const struct iio_data_format *fmt = iio_channel_get_data_format(channels[i]);
-			unsigned int repeat = has_repeat ? fmt->repeat : 1;
-			size_t sample_size = fmt->length / 8 * repeat;
+		for (i = 0; i < channel_count; i++) {
+			const char *id;
+			const char *unit;
+			struct iio_channel *chn =
+				iio_device_get_channel(dev, i);
+			if (!is_valid_channel(chn))
+				continue;
 
-			buf = malloc(sample_size * buffer_length);
+			name = iio_channel_get_name(chn);
+			id = iio_channel_get_id(chn);
+			if (!name)
+				name = id;
+			unit = id_to_unit(id);
 
-			bytes = iio_channel_read(channels[i], rxbuf, buf, sample_size * buffer_length);
-
-			printf("%s ", iio_channel_get_id(channels[i]));
-			for (sample = 0; sample < bytes / sample_size; ++sample) {
-				for (j = 0; j < repeat; ++j) {
-					if (fmt->length / 8 == sizeof(int16_t))
-						printf("%i ", ((int16_t *)buf)[sample + j]);
-					else if (fmt->length / 8 == sizeof(int64_t))
-						printf("%li ", ((int64_t *)buf)[sample + j]);
-				}
-			}
-
-			free(buf);
+			printf("%s: %.3lf %s\n", name, get_channel_value(chn), unit);
+			
 		}
 		printf("\n");
 
