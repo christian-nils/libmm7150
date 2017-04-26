@@ -186,16 +186,17 @@ int main(int argc, char **argv)
 	*/
 	// Starting the streaming
 	printf("* Starting IO streaming (press CTRL+C to cancel)\n");
-	bool has_ts = strcmp(iio_channel_get_id(channels[channel_count - 1]), "timestamp") == 0;
-	int64_t last_ts = 0;
+	//bool has_ts = strcmp(iio_channel_get_id(channels[channel_count - 1]), "timestamp") == 0;
+	//int64_t last_ts = 0;
 	while (!stop)
 	{
+		/*
 		ssize_t nbytes_rx;
 		void *p_dat, *p_end;
 		ptrdiff_t p_inc;
 		int64_t now_ts;
 
-		/*
+		
 		// Refill RX buffer
 		nbytes_rx = iio_buffer_refill(rxbuf);
 		if (nbytes_rx < 0) {
@@ -218,18 +219,14 @@ int main(int argc, char **argv)
 		for (i = 0; i < channel_count; i++) {
 			const char *id;
 			const char *unit;
-			struct iio_channel *chn =
-				iio_device_get_channel(dev, i);
-			if (!is_valid_channel(chn))
-				continue;
 
-			name = iio_channel_get_name(chn);
-			id = iio_channel_get_id(chn);
+			name = iio_channel_get_name(channels[i]);
+			id = iio_channel_get_id(channels[i]);
 			if (!name)
 				name = id;
 			unit = id_to_unit(id);
 
-			printf("%s: %.3lf %s\n", name, get_channel_value(chn), unit);
+			printf("%s: %.3lf %s ", name, get_channel_value(channels[i]), unit);
 			
 		}
 		printf("\n");
