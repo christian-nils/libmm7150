@@ -102,13 +102,6 @@ int main(int argc, char **argv)
 			channels[i] = chn;
 	}
 
-	// Acquiring trigger, if it fails the program will terminate
-	printf("* Acquiring trigger\n");
-	if (iio_device_get_trigger(dev, &trigger)){
-		perror("No trigger found");
-		shutdown();
-	}
-
 	// Enable the channels for buffered capture
 	printf("* Enabling IIO streaming channels for buffered capture\n");
 	for (i = 0; i < channel_count; ++i)
