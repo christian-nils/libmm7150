@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <iio.h>
+#include <locale.h>
 
 /* Accelerometer name */
 static char *name = "accel_3d"; //FIXME
